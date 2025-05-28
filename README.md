@@ -1,3 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<!-- <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dokumentasi API - Laravel Backend</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; line-height: 1.6; }
+    h2 { margin-top: 2rem; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th { background-color: #f5f5f5; }
+    code { background: #eee; padding: 0.2rem 0.4rem; border-radius: 4px; }
+    pre { background: #f9f9f9; padding: 1rem; border-left: 4px solid #ccc; overflow: auto; }
+  </style>
+</head> -->
+<body>
+
+  <h1>🧭 Dokumentasi API Routes – Laravel Backend</h1>
+  <p>Semua endpoint dilindungi oleh <strong>Laravel Sanctum</strong> dan menggunakan <strong>middleware RBAC</strong>.</p>
+
+  <h2>🔐 Auth Endpoints</h2>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Deskripsi</th><th>Middleware</th></tr>
+    <tr><td>POST</td><td>/register</td><td>Registrasi user</td><td>-</td></tr>
+    <tr><td>POST</td><td>/login</td><td>Login user</td><td>-</td></tr>
+    <tr><td>GET</td><td>/saya</td><td>Profil user saat ini</td><td>auth:sanctum</td></tr>
+    <tr><td>GET</td><td>/user</td><td>Store permission (sementara)</td><td>-</td></tr>
+  </table>
+
+  <h2>🛡️ Role & Permission (Super Admin Only)</h2>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Deskripsi</th><th>Middleware</th></tr>
+    <tr><td>POST</td><td>/super-admin/permission</td><td>Tambah permission</td><td>auth:sanctum + role:super-admin</td></tr>
+    <tr><td>GET</td><td>/super-admin</td><td>Tambah role (sementara store)</td><td>auth:sanctum + role:super-admin</td></tr>
+  </table>
+
+  <h2>📦 Category Endpoints</h2>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Deskripsi</th><th>Middleware</th></tr>
+    <tr><td>GET</td><td>/categories/showdata</td><td>Lihat semua kategori</td><td>auth:sanctum + role:admin/super-admin/customer</td></tr>
+    <tr><td>POST</td><td>/categories/tambah</td><td>Tambah kategori baru</td><td>auth:sanctum + role:admin</td></tr>
+    <tr><td>PUT</td><td>/categories/update</td><td>Perbarui data kategori</td><td>auth:sanctum + role:admin</td></tr>
+    <tr><td>DELETE</td><td>/categories/delete</td><td>Hapus kategori</td><td>auth:sanctum + role:admin</td></tr>
+  </table>
+
+  <h2>🛍️ Product Endpoints</h2>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Deskripsi</th><th>Middleware</th></tr>
+    <tr><td>GET</td><td>/product/showdata</td><td>Lihat semua produk</td><td>auth:sanctum + role:admin/super-admin/customer</td></tr>
+    <tr><td>POST</td><td>/product/tambah</td><td>Tambah produk</td><td>auth:sanctum + role:admin/super-admin</td></tr>
+    <tr><td>POST</td><td>/product/update</td><td>Perbarui produk</td><td>auth:sanctum + role:admin/super-admin</td></tr>
+    <tr><td>DELETE</td><td>/product/delete</td><td>Hapus produk</td><td>auth:sanctum + role:admin/super-admin</td></tr>
+  </table>
+
+  <h2>💳 Payment Gateway Endpoints</h2>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Deskripsi</th><th>Middleware</th></tr>
+    <tr><td>POST</td><td>/payment-gateway/store</td><td>Membuat transaksi pembayaran</td><td>auth:sanctum + role:admin/super-admin/customer</td></tr>
+    <tr><td>POST</td><td>/payment-gateway/cek-detail-transaksi</td><td>Mengecek detail transaksi</td><td>auth:sanctum + role:admin/super-admin/customer</td></tr>
+    <tr><td>POST</td><td>/payment-gateway/cek-status-transaksi</td><td>Mengecek status pembayaran</td><td>auth:sanctum + role:admin/super-admin/customer</td></tr>
+  </table>
+
+  <h2>🚚 Shipping API</h2>
+  <table>
+    <tr><th>Method</th><th>Endpoint</th><th>Deskripsi</th><th>Middleware</th></tr>
+    <tr><td>POST</td><td>/destination</td><td>Ambil data tujuan pengiriman</td><td>auth:sanctum + role:admin/super-admin/customer</td></tr>
+  </table>
+
+  <h2>📌 Header Autentikasi</h2>
+  <pre><code>
+Authorization: Bearer {your_token}
+Content-Type: application/json
+  </code></pre>
+
+  <h2>📌 Payment Endpoints</h2>
+
+  <h3>1. POST /api/payment/store</h3>
+  <p>Membuat transaksi baru dengan pilihan metode pembayaran dan item produk.</p>
+  <pre><code>{
+  "products": [
+    { "product_id": 1, "quantity": 2 },
+    { "product_id": 3, "quantity": 1 }
+  ],
+  "metode_pembayaran": "DANA"
+}</code></pre>
+  <p><strong>Metode pembayaran yang didukung:</strong> BRIVA, QRIS, OVO, DANA, LINKAJA, BCA_KLIKPAY, MANDIRI_CLICKPAY, ALFAMART, INDOMARET</p>
+  <p><strong>Respons sukses:</strong></p>
+  <pre><code>{
+  "status": true,
+  "message": "Transaksi berhasil dibuat",
+  "data": {
+    "success": true,
+    "data": {
+      "reference": "DEV-TRX-171000123456",
+      "checkout_url": "https://tripay.co.id/checkout/DEV-TRX-171000123456"
+    }
+  }
+}</code></pre>
+
+  <h3>2. POST /api/payment/detail-transaksi</h3>
+  <p>Mengecek detail transaksi berdasarkan kode referensi.</p>
+  <pre><code>{
+  "reference": "DEV-TRX-171000123456"
+}</code></pre>
+  <p><strong>Respons sukses:</strong></p>
+  <pre><code>{
+  "status": true,
+  "message": "Status transaksi berhasil diambil",
+  "data": {
+    "success": true,
+    "data": {
+      "reference": "DEV-TRX-171000123456",
+      "status": "PAID",
+      "amount": 25000
+    }
+  }
+}</code></pre>
+
+  <h3>3. POST /api/payment/status-pembayaran</h3>
+  <p>Mengambil status pembayaran berdasarkan referensi transaksi.</p>
+  <pre><code>{
+  "reference": "DEV-TRX-171000123456"
+}</code></pre>
+  <p><strong>Respons sukses:</strong></p>
+  <pre><code>{
+  "status": true,
+  "message": "Status pembayaran berhasil diambil",
+  "data": "Lunas"
+}</code></pre>
+
+  <p><strong>Status Pembayaran:</strong> Lunas (PAID), Menunggu Pembayaran (PENDING), Kedaluwarsa (EXPIRED), Belum Bayar (lain-lain)</p>
+
+</body>
+</html>
+
+  <h2>🚀 Cara Clone dan Menjalankan Proyek Laravel</h2>
+  <pre><code>
+# 1. Clone repository
+git clone https://github.com/namauser/nama-repo.git
+cd nama-repo
+
+# 2. Install dependencies
+composer install
+
+# 3. Copy file environment
+cp .env.example .env
+
+# 4. Generate application key
+php artisan key:generate
+
+# 5. Konfigurasi .env (database, mail, dll)
+
+# 6. Jalankan migrasi dan seeding jika diperlukan
+php artisan migrate --seed
+
+# 7. Jalankan server lokal
+php artisan serve
+
+# 8. Jalankan queue jika menggunakan antrian
+php artisan queue:work
+  </code></pre>
+
+  <p><strong>Catatan:</strong> Pastikan Anda sudah mengatur database, storage link (<code>php artisan storage:link</code>), dan Laravel Sanctum untuk autentikasi token.</p>
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
