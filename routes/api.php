@@ -43,7 +43,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::post('/payment-gateway/store', [\App\Http\Controllers\Api\PaymentGateway::class, 'store'])->middleware('auth:sanctum', 'role:admin|super-admin|customer');
+Route::post('/payment-gateway/store', [\App\Http\Controllers\Api\PaymentGateway::class, 'store']);
 Route::post('/payment-gateway/cek-detail-transaksi', [\App\Http\Controllers\Api\PaymentGateway::class, 'CekDetailTransaksi'])->middleware('auth:sanctum', 'role:admin|super-admin|customer');
 Route::post('/payment-gateway/cek-status-transaksi', [\App\Http\Controllers\Api\PaymentGateway::class, 'CekStatusPembayaran'])->middleware('auth:sanctum', 'role:admin|super-admin|customer');
 Route::post('/destination', [\App\Http\Controllers\Api\ShippingController::class, 'get_destinations'])->middleware('auth:sanctum', 'role:admin|super-admin|customer');

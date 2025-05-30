@@ -22,6 +22,10 @@ class tripay {
 
     }
 
+    public function getApiKey(){
+        
+    }
+
     public function setSignature($invoice, $amount){
         $this->invoice = $invoice;
         $this->amount = $amount;

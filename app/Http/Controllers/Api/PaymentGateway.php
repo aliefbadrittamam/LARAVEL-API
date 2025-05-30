@@ -37,14 +37,21 @@ class PaymentGateway extends Controller
         try {
             // Validasi requestf
             $request->validate([
+                'store_name' => 'required|string|min:4',
+                'customer_name' => 'required|string|min:5',
+                'customer_email' => 'required|email',
+                'customer_phone' => 'required|numeric|digits_between:10,14',
                 'products' => 'required|array|min:1',
-                'products.*.product_id' => 'required|exists:products,id',
                 'products.*.quantity' => 'required|integer|min:1',
+                'products.*.product_name' => 'required|string|min:1',
+                'products.*.product_code' => 'required|string|min:1',
+                'products.*.product_price' => 'required|integer|min:1',
+                'callback_url' => 'required|string',
                 'metode_pembayaran' => 'required|string|in:BRIVA,QRIS,OVO,DANA,LINKAJA,BCA_KLIKPAY,MANDIRI_CLICKPAY,ALFAMART,INDOMARET',
             ]);
 
             // Ambil user yang login via Sanctum
-            $user = $request->user();
+            // $user = $request->user();
 
             // Opsional: Cek permission dengan Spatie
             // if (!$user->hasPermissionTo('create transaction')) {
@@ -55,24 +62,30 @@ class PaymentGateway extends Controller
             // }
 
             // Generate invoice & amount
-            $metode_pembayaran = $request->input('metode_pembayaran', 'BRIVA');
+            $metode_pembayaran = $request->input('metode_pembayaran');
             $invoice = 'INV-' . date('YmdHis');
             $amount = 0;
             $orderItems = [];
 
             foreach ($request->products as $item) {
-                $product = Product::findOrFail($item['product_id']);
-                $subtotal = $product->price * $item['quantity'];
-                $amount += $subtotal;
+                // $product = Product::findOrFail($item['product_id']);
+                $product_code = $item['product_code'];
+                $product_name = $item['product_name'];
+                $product_price = $item['product_price'];
+                $subtotal = $product_price * $item['quantity'];
+                // $amount += $subtotal;
 
                 $orderItems[] = [
-                    'sku' => 'PRD-' . $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price,
+                    'sku' => $item['product_code'],
+                    'name' => $item['product_name'],
+                    'price' => $item['product_price'],
+                    'subtotal' => $subtotal,
                     'quantity' => $item['quantity'],
                     // 'product_url' => 'https://tokokamu.com/product/' . $product->slug,
                     // 'image_url' => $product->images->first()->image_url ?? 'https://tokokamu.com/default.jpg',
                 ];
+
+                $amount += $subtotal;
             }
             // dd($user);
             // Set signature Tripay
@@ -85,11 +98,11 @@ class PaymentGateway extends Controller
                 'method' => $metode_pembayaran,
                 'merchant_ref' => $invoice,
                 'amount' => $amount,
-                'customer_name' => $user->name,
-                'customer_email' => $user->email,
-                'customer_phone' => $user->phone,
+                'customer_name' => $request->input('store_name'). '  -  '. $request->input('customer_name'),
+                'customer_email' => $request->input('customer_email'),
+                'customer_phone' => $request->input('customer_phone'),
                 'order_items' => $orderItems,
-                'return_url' => 'https://domainanda.com/redirect',
+                'return_url' => $request->input('callback_url'),
                 'expired_time' => time() + 24 * 60 * 60, // 24 jam
                 'signature' => $this->paymentGateway->getSignature(),
             ];
@@ -106,29 +119,30 @@ class PaymentGateway extends Controller
                 'Authorization' => 'Bearer ' . $tripayToken,
             ]);
 
-            if (!$response || !isset($response['success']) || $response['success'] !== true) {
-                // throw new \Exception('Gagal membuat transaksi di Tripay.');
-                return response()->json(
-                    [
-                        'status' => false,
-                        'message' => 'Gagal membuat transaksi di Tripay.',
-                        'data' => $response,
-                    ],
-                    500,
-                );
-            } else {
-                Transaksi::create([
-                    'kode_transaksi' => $invoice,
-                    'kode_referensi' => $response['data']['reference'],
-                    'user_id' => $user->id,
-                    // 'user_id' => $user->id,
-                    // 'total_harga' => $amount,
-                    // 'metode_pembayaran' =>
-                    // 'status' => 'PENDING',
-                ]);
-            }
+            // if (!$response || !isset($response['success']) || $response['success'] !== true) {
+            //     // throw new \Exception('Gagal membuat transaksi di Tripay.');
+            //     return response()->json(
+            //         [
+            //             'status' => false,
+            //             'message' => 'Gagal membuat transaksi di Tripay.',
+            //             'data' => $response,
+            //         ],
+            //         500,
+            //     );
+            // } else {
+            //     Transaksi::create([
+            //         'kode_transaksi' => $invoice,
+            //         'kode_referensi' => $response['data']['reference'],
+            //         'user_id' => $user->id,
+            //         // 'user_id' => $user->id,
+            //         // 'total_harga' => $amount,
+            //         // 'metode_pembayaran' =>
+            //         // 'status' => 'PENDING',
+            //     ]);
+            // }
 
             return response()->json([
+                // dd($request->all()),
                 'status' => true,
                 'message' => 'Transaksi berhasil dibuat',
                 'data' => $response,
