@@ -78,7 +78,6 @@ Content-Type: application/json
   <h3>1. POST /api/payment/store</h3>
   <p>Membuat transaksi baru dengan pilihan metode pembayaran dan item produk.</p>
   <pre><code>{
-  "{
   "store_name": "Toko Mebel Jaya",
   "customer_name": "Budi Santoso",
   "customer_email": "budi@example.com",
@@ -99,8 +98,6 @@ Content-Type: application/json
   ],
   "callback_url": "https://tokomebeljaya.com/payment-callback",
   "metode_pembayaran": "QRIS"
-}
-
 }</code></pre>
   <p><strong>Metode pembayaran yang didukung:</strong> BRIVA, QRIS, OVO, DANA, LINKAJA, BCA_KLIKPAY, MANDIRI_CLICKPAY, ALFAMART, INDOMARET</p>
   <p><strong>Respons sukses:</strong></p>
