@@ -9,6 +9,7 @@ class ApiAdapter
 {
     protected $http;
 
+
     public function __construct()
     {
         $this->http = new Client();
