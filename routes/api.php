@@ -22,7 +22,7 @@ Route::get('/super-admin', action: [RoleController::class, 'store'])->middleware
 
 
 Route::prefix('categories')->middleware('auth:sanctum')->group(function () {
-    // Menampilkan semua kategori
+    // Menampilkan semua kategori we
     Route::get('/showdata', [CategoryController::class, 'index'])->middleware('role:admin|super-admin|customer'); 
     Route::post('/tambah', [CategoryController::class, 'setCategory'])->middleware('role:admin');
     Route::put('/update', [CategoryController::class, 'updateCategory'])->middleware('role:admin');;
