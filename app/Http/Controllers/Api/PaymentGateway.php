@@ -62,7 +62,7 @@ class PaymentGateway extends Controller
             // }
 
             // Generate invoice & amount
-            $metode_pembayaran = $request->input('metode_pembayaran');
+            $metode_pembayaran = $request->metode_pembayaran;
             $invoice = 'INV-' . date('YmdHis');
             $amount = 0;
             $orderItems = [];
@@ -107,7 +107,7 @@ class PaymentGateway extends Controller
                 'signature' => $this->paymentGateway->getSignature(),
             ];
 
-            $http = new \GuzzleHttp\Client();
+            // $http = new \GuzzleHttp\Client();
             // $response = $http->post('https://tripay.co.id/api-sandbox/transaction/create', [
             //     'headers' => [
             //         'Authorization' => 'Bearer '. $tripayToken,
@@ -116,7 +116,7 @@ class PaymentGateway extends Controller
             // ]);
 
             $response = $this->api->post('https://tripay.co.id/api-sandbox/transaction/create', $data, [
-                'Authorization' => 'Bearer ' . $tripayToken,
+                'Authorization' => 'Bearer ' . $this->paymentGateway->getApiKey(),
             ]);
 
             // if (!$response || !isset($response['success']) || $response['success'] !== true) {

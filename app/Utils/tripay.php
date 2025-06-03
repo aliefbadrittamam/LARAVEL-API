@@ -1,11 +1,12 @@
 <?php 
 
 namespace App\Utils;
-class tripay {
+class Tripay {
     protected $apiKey;
     protected $privateKey;
     protected $merchantCode;
     protected $amount;
+    protected ApiAdapter $apiAdapter;
 
     protected $invoice;
 
@@ -13,6 +14,7 @@ class tripay {
         $this->apiKey = env('TRIPAY_API_KEY');
         $this->privateKey = env('TRIPAY_PRIVATE_KEY');
         $this->merchantCode = env('TRIPAY_MERCHANT_CODE');
+        $this->apiAdapter = new ApiAdapter();
 
     }
 
@@ -22,7 +24,9 @@ class tripay {
 
     }
 
-    public function getApiKey(){
+    public function getApiKey(): string
+    {
+        return $this->apiKey;
         
     }
 
@@ -30,4 +34,15 @@ class tripay {
         $this->invoice = $invoice;
         $this->amount = $amount;
     }
+
+
+//   public function createTransaction($data){
+
+//       $response = $this->apiAdapter->post('https://tripay.co.id/api/transaction/create', $data, [
+//         'Authorization' => 'Bearer ' . $this->getApiKey(),
+//     ]);
+
+
+//     return $response;
+//   }
 }
